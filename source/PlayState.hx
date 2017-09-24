@@ -10,6 +10,9 @@ import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
+import com.newgrounds.*;
+import com.newgrounds.components.*;
+
 
 class PlayState extends FlxState
 {
@@ -32,15 +35,18 @@ class PlayState extends FlxState
 	
 	private var _creds:FlxText;
 	
+	private var finished:Bool = false;
+	
 	var randomInt:Int;
 	var _oldInt:Int = 0;
 	
 	override public function create():Void
 	{
+		FlxG.fixedTimestep = false;
 		_widthQuart = FlxG.width / 4;
 		
 		song = new FlxSound();
-		song.loadEmbedded("assets/music/729966_Grid-Builder.mp3", true);
+		song.loadEmbedded("assets/music/729966_Grid-Builder.mp3", false, false, finishSong);
 		add(song);
 		song.play();
 		
@@ -50,7 +56,7 @@ class PlayState extends FlxState
 		_box.makeGraphic(Std.int(_widthQuart), Std.int(_widthQuart));
 		add(_box);
 		
-		_tip = new FlxText(0, 0, 0, "Controls: A S D F \nPress them from left to right\nStay in the larger box", 20);
+		_tip = new FlxText(0, 0, 0, "Controls: A S D F \nPress them from left to right at the same time\nStay in the larger box\nPress R to quick reset", 20);
 		_tip.alignment = FlxTextAlign.CENTER;
 		_tip.autoSize = false;
 		_tip.screenCenter();
@@ -98,6 +104,7 @@ class PlayState extends FlxState
 				_box.color = FlxG.random.color(FlxColor.BLUE, FlxColor.RED);
 				
 				_box.setPosition(randomInt * _widthQuart, 100);
+				API.postScore("Score", Std.int(_score * 1000));
 			}
 			
 			_totalBeats += 1;
@@ -117,10 +124,10 @@ class PlayState extends FlxState
 		
 		controls();
 		
-		if (_position == randomInt && _totalBars >= 3.75)
+		if (_position == randomInt && _totalBars >= 3.75 && !finished)
 		{
 			_score += FlxG.elapsed;
-			_score = FlxMath.roundDecimal(_score, 2);
+			_score = FlxMath.roundDecimal(_score, 3);
 		}
 		
 		_scoreText.text = "Score: " + _score;
@@ -143,7 +150,6 @@ class PlayState extends FlxState
 		_bt4 = FlxG.keys.pressed.F;
 		
 		
-		
 		if (_bt1)
 		{
 			_position = 0;
@@ -161,9 +167,18 @@ class PlayState extends FlxState
 			_position = 3;
 		}
 		
+		if (FlxG.keys.justPressed.R)
+			FlxG.resetState();
+		
 		_player.x = (_widthQuart * _position) + ((_box.width - _player.width) / 2);
 		
 		
 		FlxG.watch.add(this, "_position");
+	}
+	
+	private function finishSong():Void
+	{
+		API.unlockMedal("Good Music");
+		finished = true;
 	}
 }

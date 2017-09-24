@@ -16,9 +16,11 @@
 -D no-compilation
 -D NAPE_RELEASE_BUILD
 -D openfl-flash
+-D as3_native
 -D fdb
 -D web
 --macro flixel.system.macros.FlxDefines.run()
+-swf-lib NewgroundsAPI.swc
 -swf-lib export/flash/obj/assets.swf
 -swf-version 11.8
 -swf export/flash/bin/MGJGame.swf
